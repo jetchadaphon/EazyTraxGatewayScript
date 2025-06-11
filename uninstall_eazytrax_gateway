@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+SERVICE_NAME="eazytrax-gateway"
+TARGET_PATH="/usr/local/bin/$SERVICE_NAME"
+ENV_TARGET="/etc/$SERVICE_NAME.env"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+
+echo "🧹 Uninstalling $SERVICE_NAME system service..."
+
+# Check if service exists
+if systemctl list-units --full -all | grep -q "$SERVICE_NAME.service"; then
+    sudo systemctl stop "$SERVICE_NAME" || true
+    sudo systemctl disable "$SERVICE_NAME" || true
+    echo "🛑 Service stopped and disabled."
+else
+    echo "ℹ️ Service not found in systemd. Skipping stop/disable."
+fi
+
+# Remove systemd service file
+if [ -f "$SERVICE_FILE" ]; then
+    sudo rm -f "$SERVICE_FILE"
+    echo "🗑️ Removed systemd service file."
+fi
+
+# Remove binary
+if [ -f "$TARGET_PATH" ]; then
+    sudo rm -f "$TARGET_PATH"
+    echo "🗑️ Removed binary at $TARGET_PATH."
+fi
+
+# Remove environment file
+if [ -f "$ENV_TARGET" ]; then
+    sudo rm -f "$ENV_TARGET"
+    echo "🗑️ Removed environment file at $ENV_TARGET."
+fi
+
+sudo systemctl daemon-reload
+sudo systemctl daemon-reexec
+
+echo "✅ Uninstallation of '$SERVICE_NAME' complete."

@@ -1,0 +1,51 @@
+#!/bin/bash
+set -e
+
+SERVICE_NAME="eazytrax-gateway"
+BINARY_NAME="app"
+TARGET_PATH="/usr/local/bin/$SERVICE_NAME"
+ENV_TARGET="/etc/$SERVICE_NAME.env"
+USER_NAME="eazytrax"
+
+cd /home/$USER_NAME/EazyTraxGateway
+
+echo "Installing $SERVICE_NAME as a system service..."
+
+if [ ! -f "$BINARY_NAME" ]; then
+   echo "❌ Binary '$BINARY_NAME' not found!"
+   exit 1
+fi
+
+if [ ! -f ".env" ]; then
+   echo "❌ .env file not found!"
+   exit 1
+fi
+
+sudo cp "$BINARY_NAME" "$TARGET_PATH"
+sudo chmod +x "$TARGET_PATH"
+sudo cp .env "$ENV_TARGET"
+sudo chmod 644 "$ENV_TARGET"
+
+cat <<EOL | sudo tee /etc/systemd/system/${SERVICE_NAME}.service
+[Unit]
+Description=EazyTrax Gateway Service
+After=network.target
+
+[Service]
+ExecStart=$TARGET_PATH
+WorkingDirectory=/home/$USER_NAME/EazyTraxGateway
+EnvironmentFile=$ENV_TARGET
+Restart=always
+User=$USER_NAME
+Group=$USER_NAME
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable "$SERVICE_NAME"
+sudo systemctl restart "$SERVICE_NAME"
+
+echo "✅ Service '$SERVICE_NAME' Success!"
