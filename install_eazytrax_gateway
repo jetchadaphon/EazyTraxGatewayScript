@@ -7,7 +7,7 @@ TARGET_PATH="/usr/local/bin/$SERVICE_NAME"
 ENV_TARGET="/etc/$SERVICE_NAME.env"
 USER_NAME="eazytrax"
 
-cd /home/$USER_NAME/EazyTraxGateway
+cd /home/$USER_NAME/EazytraxGateway
 
 echo "Installing $SERVICE_NAME as a system service..."
 
@@ -33,7 +33,7 @@ After=network.target
 
 [Service]
 ExecStart=$TARGET_PATH
-WorkingDirectory=/home/$USER_NAME/EazyTraxGateway
+WorkingDirectory=/home/$USER_NAME/EazytraxGateway
 EnvironmentFile=$ENV_TARGET
 Restart=always
 User=$USER_NAME
